@@ -5,8 +5,8 @@ A cross-referenced snapshot of pharmaceutical trial results, regulatory approval
 
 **[View live demo →](#)** *(replace with your GitHub Pages URL after deploying)*
 
-![Tracker preview](preview.png)
-*(optional: add a screenshot here once deployed)*
+
+
 
 ## What this does
 
