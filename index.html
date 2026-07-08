@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharmaceutical Development Tracker</title>
+<meta name="description" content="A cross-referenced snapshot of pharmaceutical trial results, approvals, and setbacks across 16 companies and three disease areas: infectious disease, chronic disease, and autoimmune.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1410;
+    --paper: #faf7f2;
+    --panel: #ffffff;
+    --line: #e8e1d4;
+    --signal: #e8452c;
+    --signal-dark: #b8331f;
+    --signal-tint: #fdeae6;
+    --approval: #1a7a4c;
+    --approval-tint: #e6f4ec;
+    --setback: #201c18;
+    --filing: #6b5ecd;
+    --filing-tint: #eeecfa;
+    --early: #8a8272;
+    --early-tint: #f1efe9;
+    --muted: #756e60;
+    --display: 'Fraunces', Georgia, serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+    --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+  }
+
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 56px 32px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .masthead::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 280px;
+    height: 280px;
+    background: var(--signal);
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+
+  .masthead-inner {
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--signal);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .masthead h1 {
+    font-family: var(--display);
+    font-size: clamp(38px, 5.5vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+    max-width: 800px;
+  }
+
+  .masthead .subtitle {
+    font-family: var(--sans);
+    font-size: 16px;
+    color: #d8d2c6;
+    margin-top: 16px;
+    max-width: 560px;
+    line-height: 1.5;
+  }
+
+  .disclosure {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #b8b0a0;
+    background: rgba(255,255,255,0.06);
+    border-left: 3px solid var(--signal);
+    padding: 12px 16px;
+    margin-top: 24px;
+    max-width: 780px;
+    line-height: 1.7;
+  }
+
+  .controls {
+    background: var(--panel);
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 32px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .control-group label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  select {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 9px 12px;
+    border: 2px solid var(--ink);
+    background: var(--panel);
+    color: var(--ink);
+    min-width: 200px;
+    border-radius: 3px;
+  }
+
+  select:focus { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+  .outcome-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .legend-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+
+  main {
+    padding: 32px 32px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 2px solid var(--ink);
+    padding: 18px 20px 18px 22px;
+    position: relative;
+    border-left-width: 6px;
+  }
+
+  .stat-card .num {
+    font-family: var(--display);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-card .label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .matrix-wrap {
+    background: var(--panel);
+    border: 2px solid var(--ink);
+    padding: 28px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+
+  .matrix-wrap h2 {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .matrix-sub {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+  }
+
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 640px;
+  }
+
+  table.matrix th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--ink);
+    padding: 10px;
+  }
+
+  table.matrix td {
+    padding: 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  table.matrix td.company-cell {
+    text-align: left;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .matrix-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s ease;
+  }
+
+  .matrix-count.has-data:hover { transform: scale(1.15); }
+  .matrix-count.empty { color: var(--line); cursor: default; background: none; }
+
+  .cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .cards-header h2 {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .cards-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 18px;
+  }
+
+  .dev-card {
+    background: var(--panel);
+    border: 2px solid var(--ink);
+    padding: 22px 24px;
+    position: relative;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .dev-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .dev-card .dev-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .dev-card .company {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .dev-card .date {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .dev-card .outcome-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+    transform: rotate(-1deg);
+  }
+
+  .dev-card .headline {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .dev-card .detail {
+    font-size: 14px;
+    color: var(--ink);
+    opacity: 0.78;
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+
+  .dev-card .source {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    background: var(--panel);
+    border: 2px dashed var(--line);
+  }
+
+  footer {
+    padding: 28px 32px 48px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    max-width: 1400px;
+    margin: 0 auto;
+    border-top: 1px solid var(--line);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 900px) {
+    .masthead { padding: 40px 20px 32px; }
+    .controls { padding: 16px 20px; position: static; }
+    .outcome-legend { margin-left: 0; }
+    main { padding: 24px 20px 40px; }
+    .dev-grid { grid-template-columns: 1fr; }
+    .dev-card:hover { transform: none; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">Pipeline Watch — Wins, Filings &amp; Setbacks</div>
+    <h1>Pharmaceutical Development Tracker</h1>
+    <div class="subtitle">Trial results, approvals, and setbacks — cross-referenced by company and disease area</div>
+    <div class="disclosure">
+      This is a research-compiled snapshot, not a live feed. Entries were gathered via web search and cover
+      roughly the last 12 months across 16 companies. It is refreshed on request, not automatically, and is not
+      exhaustive: some companies have limited public developments in these three disease areas specifically, and
+      that gap is shown honestly rather than filled in. Verify anything decision-relevant against the source
+      listed on each entry.
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label for="companyFilter">Company</label>
+    <select id="companyFilter">
+      <option value="all">All companies</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label for="diseaseFilter">Disease area</label>
+    <select id="diseaseFilter">
+      <option value="all">All disease areas</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label for="outcomeFilter">Outcome type</label>
+    <select id="outcomeFilter">
+      <option value="all">All outcome types</option>
+    </select>
+  </div>
+  <div class="outcome-legend" id="outcomeLegend"></div>
+</div>
+
+<main>
+  <div class="stat-row" id="statRow"></div>
+
+  <div class="matrix-wrap">
+    <h2>Company × Disease Area Matrix</h2>
+    <div class="matrix-sub">Click any cell to filter the developments below</div>
+    <table class="matrix" id="matrixTable">
+      <thead><tr id="matrixHead"></tr></thead>
+      <tbody id="matrixBody"></tbody>
+    </table>
+  </div>
+
+  <div class="cards-header">
+    <h2>Developments</h2>
+    <div class="cards-count" id="cardsCount"></div>
+  </div>
+  <div class="dev-grid" id="devGrid"></div>
+</main>
+
+<footer>
+  Compiled from company SEC filings (10-K, 10-Q, 8-K, 6-K), investor relations press releases, and pharmaceutical
+  trade press. Entries reflect publicly disclosed clinical trial results, regulatory approvals, and setbacks;
+  outcome classifications (approval, positive result, filing, setback, early-stage) are editorial judgments made
+  when compiling this snapshot, not a standardized industry taxonomy. This dashboard performs no live data
+  fetching — refreshing requires re-running the research process. Built for informational purposes; not
+  investment advice.
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
