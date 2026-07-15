@@ -3,9 +3,6 @@
 
 A cross-referenced snapshot of pharmaceutical trial results, regulatory approvals, filings, and setbacks across 16 companies and three disease areas: infectious disease, chronic disease, and autoimmune.
 
-**[View live demo →](#)** *(replace with your GitHub Pages URL after deploying)*
-
-
 
 
 ## What this does
